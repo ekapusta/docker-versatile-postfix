@@ -1,5 +1,5 @@
 FROM ubuntu:14.04
-MAINTAINER MarvAmBass
+MAINTAINER Dmitry Romanov "dmitry.romanov85@gmail.com"
 
 ## Install Postfix.
 
@@ -37,6 +37,7 @@ RUN echo "pwcheck_method: saslauthd" > /etc/postfix/sasl/smtpd.conf; \
 
 # postfix settings
 RUN postconf -e smtpd_sasl_auth_enable="yes"; \
+    postconf -e mynetworks="172.17.0.1"; \
     postconf -e smtpd_recipient_restrictions="permit_mynetworks permit_sasl_authenticated reject_unauth_destination"; \
     postconf -e smtpd_helo_restrictions="permit_sasl_authenticated, permit_mynetworks, reject_invalid_hostname, reject_unauth_pipelining, reject_non_fqdn_hostname"
 
@@ -49,6 +50,7 @@ RUN sed -i 's/^OPTIONS=/#OPTIONS=/g' /etc/default/saslauthd; \
 
 # dkim settings
 RUN mkdir -p /etc/postfix/dkim; \
+    echo "InternalHosts		172.17.0.1" >> /etc/opendkim.conf; \
     echo "KeyFile                 /etc/postfix/dkim/dkim.key" >> /etc/opendkim.conf; \
     echo "Selector                mail" >> /etc/opendkim.conf; \
     echo "SOCKET                  inet:8891@localhost" >> /etc/opendkim.conf
