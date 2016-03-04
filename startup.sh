@@ -41,7 +41,6 @@ echo ">> setting up postfix for: $1"
 
 # add domain
 postconf -e myhostname="$1"
-postconf -e mydestination="$1"
 echo "$1" > /etc/mailname
 echo "Domain $1" >> /etc/opendkim.conf
 
