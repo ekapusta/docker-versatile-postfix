@@ -71,6 +71,34 @@ then
   done
 fi
 
+if [ -z ${DISABLE_TLS} ]
+then
+  echo ">> enable TLS"
+
+  postconf -e smtp_tls_security_level="${TLS_SECURITY_LEVEL}";
+  if [ ! -z ${CERT_FILE+x} ]
+  then
+    echo "  >> Enable certificate"
+    postconf -e smtpd_tls_cert_file="${CERT_FILE}"
+    if [ ! -z ${CERT_KEY+x} ]
+    then
+        postconf -e smtpd_tls_key_file="${CERT_KEY}"
+    fi
+    if [ ! -z ${CERT_CA+x} ]
+    then
+        postconf -e smtpd_tls_CAfile="${CERT_CA}"
+    fi
+
+    postconf -e smtp_tls_loglevel=1
+    postconf -M submission/inet="submission   inet   n   -   n   -   -   smtpd"
+    postconf -P "submission/inet/syslog_name=postfix/submission"
+    postconf -P "submission/inet/smtpd_tls_security_level=encrypt"
+    postconf -P "submission/inet/smtpd_sasl_auth_enable=yes"
+    postconf -P "submission/inet/smtpd_client_restrictions=permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination"
+    postconf -P "submission/inet/smtpd_recipient_restrictions=permit_mynetworks,permit_sasl_authenticated,reject_unauth_destination"
+  fi
+fi
+
 # DKIM
 if [ -z ${DISABLE_DKIM+x} ]
 then

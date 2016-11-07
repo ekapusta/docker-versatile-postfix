@@ -19,12 +19,25 @@ View in GitHub [MarvAmBass/docker-versatile-postfix](https://github.com/MarvAmBa
 ## Environment variables and defaults
 
 * __ALIASES__
- * optional, no default, example usage: "postmaster:root;john:root;j.doe:root"
+  * optional, no default, example usage: "postmaster:root;john:root;j.doe:root"
 * __DISABLE\_DKIM__
- * default: not set - if set to any value the DKIM Signing will be deactivated
+  * default: not set - if set to any value the DKIM Signing will be deactivated
 * __DKIM\_CANONICALIZATION__
- * default: _simple_ - can be either _relaxed_ or _simple_
-
+  * default: _simple_ - can be either _relaxed_ or _simple_
+* __DISABLE_TLS__
+  * default: not set - if set to any value TLS will be disabled
+* __TLS_SECURITY_LEVEL__
+  * default: `may` [see documentation](http://www.postfix.org/postconf.5.html#smtp_tls_security_level)
+* __CERT_FILE__
+    * File with the Postfix SMTP server RSA certificate in PEM format.
+     This file may also contain the Postfix SMTP server private RSA key.
+* __CERT_KEY__
+    * _Optional_. File with the Postfix SMTP server RSA private key in PEM format. 
+    This file may be combined with the Postfix SMTP server RSA certificate file specified with __CERT_FILE__
+    [see](http://www.postfix.org/postconf.5.html#smtpd_tls_key_file)
+* __CERT_CA__
+    * A file containing (PEM format) CA certificates of root CAs trusted to sign either remote SMTP client certificates 
+    or intermediate CA certificates. [see](http://www.postfix.org/postconf.5.html#smtpd_tls_CAfile)
 
 ## Running the Mailserver
 
@@ -42,7 +55,7 @@ To create a new postfix server for your domain you should use the following comm
 	docker run -p 25:25 -v /maildirs:/var/mail \
 		-v /dkim:/etc/postfix/dkim/ \
 		-e 'ALIASES=postmaster:root;hostmaster:root;webmaster:root' \
-		marvambass/versatile-postfix \
+		ekapusta/docker-postfix \
 		yourdomain.com \
 		user:password \
 		user1:password \
@@ -55,6 +68,33 @@ The _/dkim_ directory has to contain a DKIM-Key _(see above)_ with the name __dk
 
 It has serveral user accounts like _user1_ with password "_password_" and
 a mail address _user1@yourdomain.com_
+
+## TLS (port 587)
+
+### self signed certificate
+For generate self signed certificate run
+ 
+```bash
+openssl req -new -nodes -x509 -out smtpd.pem -keyout smtpd.pem -days 3650
+```
+__IMPORTANT__: _Common Name_ must contain the fully-qualified host name 
+
+For start:
+
+    docker run -p 587:587 -v /maildirs:/var/mail \
+    		-v /dkim:/etc/postfix/dkim/ \
+    		-v /cert:/etc/postfix/certs
+    		-e 'CERT_FILE=/etc/postfix/certs/smtpd.pem' \
+            -e 'CERT_KEY=/etc/postfix/certs/smtpd.pem' \
+            -e 'CERT_CA=/etc/postfix/certs/smtpd.pem' \
+    		-e 'ALIASES=postmaster:root;hostmaster:root;webmaster:root' \
+    		ekapusta/docker-postfix \
+    		yourdomain.com \
+    		user:password \
+    		user1:password \
+    		user2:password \
+    		userN:password
+    
 
 ## DKIM
 

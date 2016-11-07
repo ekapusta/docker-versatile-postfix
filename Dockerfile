@@ -33,7 +33,7 @@ RUN sed -i 's/^START=.*/START=yes/g' /etc/default/saslauthd; \
 
 RUN echo "pwcheck_method: saslauthd" > /etc/postfix/sasl/smtpd.conf; \
     echo "mech_list: PLAIN LOGIN" >> /etc/postfix/sasl/smtpd.conf; \
-    echo "saslauthd_path: /var/run/saslauthd/mux" >> /etc/postfix/sasl/smtpd.conf
+    echo "saslauthd_path: /var/spool/postfix/var/run/saslauthd/mux" >> /etc/postfix/sasl/smtpd.conf
 
 # postfix settings
 RUN postconf -e smtpd_sasl_auth_enable="yes"; \
@@ -60,8 +60,12 @@ RUN sed -i 's/^SOCKET=/#SOCKET=/g' /etc/default/opendkim; \
 
 ## FINISHED
 
+# ENV defaults
+ENV TLS_SECURITY_LEVEL=may
+
 # Postfix Ports
 EXPOSE 25
+EXPOSE 587
 
 # Add startup script
 ADD startup.sh /opt/startup.sh
