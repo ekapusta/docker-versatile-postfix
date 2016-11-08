@@ -1,18 +1,16 @@
-version: '2'
-services:
-  postfix:
-    build: .
-    ports:
-      - "587:587"
-      - "25:25"
-    volumes:
-      - ./cert:/etc/postfix/certs
-      - ./dkim:/etc/postfix/dkim
-    command:
-      - example.com
-      - test:test
-    environment:
-      - ALIASES=postmaster:root;hostmaster:root;webmaster:root
-      - CERT_FILE=/etc/postfix/certs/smtpd.pem
-      - CERT_KEY=/etc/postfix/certs/smtpd.pem
-      - CERT_CA=/etc/postfix/certs/smtpd.pem
+postfix:
+  image: ekapusta/docker-postfix
+  ports:
+    - "587:587"
+    - "25:25"
+  volumes:
+    - ./cert:/etc/postfix/certs
+    - ./dkim:/etc/postfix/dkim
+  command:
+    - example.com
+    - test:test
+  environment:
+    - ALIASES=postmaster:root;hostmaster:root;webmaster:root
+    - CERT_FILE=/etc/postfix/certs/smtpd.pem
+    - CERT_KEY=/etc/postfix/certs/smtpd.pem
+    - CERT_CA=/etc/postfix/certs/smtpd.pem
